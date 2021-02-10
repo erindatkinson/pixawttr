@@ -53,7 +53,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
-All contributors are held to the [Code of Conduct](CODE_OF_CONDUCT.md) adapted from the [Contributor Covenant version 1.4](https://www.contributor-covenant.org/version/1/4/code-of-conduct.html)
+All contributors are held to the [Code of Conduct](docs/CODE_OF_CONDUCT.md) adapted from the [Contributor Covenant version 1.4](https://www.contributor-covenant.org/version/1/4/code-of-conduct.html)
 
 ## License
 By using this you agree to abide by the [Pixabay License](https://pixabay.com/service/license/) in the usage of images downloaded from Pixabay.
