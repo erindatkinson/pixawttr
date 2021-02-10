@@ -9,13 +9,16 @@ import (
 
 const endpoint = "https://wttr.in/"
 
-//GetWeather gets the weather at the location
-func GetWeatherImage(location string) (string, error) {
+//GetWeatherImage gets the weather at the location
+func GetWeatherImage(location string, inFarenheight bool) (string, error) {
 	uri, _ := url.Parse(endpoint)
 	uri.Path = location + "_0tqp.png"
 	q := uri.Query()
-	q.Set("m", "")
-
+	if inFarenheight {
+		q.Set("u", "")
+	} else {
+		q.Set("m", "")
+	}
 	uri.RawQuery = q.Encode()
 
 	resp, err := http.Get(uri.String())
@@ -39,11 +42,15 @@ func GetWeatherImage(location string) (string, error) {
 }
 
 // GetWeather gets the weather text at a location
-func GetWeather(location string) (string, error) {
+func GetWeather(location string, inFarenheight bool) (string, error) {
 	uri, _ := url.Parse(endpoint)
 	uri.Path = location
 	q := uri.Query()
-	q.Set("m", "")
+	if inFarenheight {
+		q.Set("u", "")
+	} else {
+		q.Set("m", "")
+	}
 	q.Set("format", "j1")
 	uri.RawQuery = q.Encode()
 

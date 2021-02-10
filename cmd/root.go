@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	cfgFile   string
-	useMetric bool
+	cfgFile        string
+	useFarenheight bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 			cmd.Usage()
 			return
 		}
-		text, err := wttrin.GetWeather(cmd.Flags().Args()[0])
+		text, err := wttrin.GetWeather(cmd.Flags().Args()[0], useFarenheight)
 		if err != nil {
 			hclog.Default().Error("couldn't get weather", "error", err)
 			return
@@ -48,7 +48,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
-		weatherImg, err := wttrin.GetWeatherImage(cmd.Flags().Args()[0])
+		weatherImg, err := wttrin.GetWeatherImage(cmd.Flags().Args()[0], useFarenheight)
 		if err != nil {
 			hclog.Default().Error("couldn't download forecast image", "error", err)
 			return
@@ -82,13 +82,8 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pixawttr.yaml)")
-	rootCmd.Flags().BoolVarP(&useMetric, "metric", "m", false, "use metric")
+	rootCmd.Flags().BoolVarP(&useFarenheight, "farenheight", "f", false, "if flag is set, don't use celcius")
 }
 
 // initConfig reads in config file and ENV variables if set.
