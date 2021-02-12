@@ -17,11 +17,12 @@ import (
 var (
 	cfgFile        string
 	useFarenheight bool
+	bgQuery        string
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "pixawttr location [outfile]",
+	Use:   "pixawttr location [--query query] [--farenheight] [outfile]",
 	Short: "A binary to make pretty weather updates",
 	Long:  ``,
 
@@ -36,13 +37,19 @@ var rootCmd = &cobra.Command{
 			cmd.Usage()
 			return
 		}
-		text, err := wttrin.GetWeather(cmd.Flags().Args()[0], useFarenheight)
-		if err != nil {
-			hclog.Default().Error("couldn't get weather", "error", err)
-			return
+		var queryText string
+		if bgQuery == "" {
+			text, err := wttrin.GetWeather(cmd.Flags().Args()[0], useFarenheight)
+			if err != nil {
+				hclog.Default().Error("couldn't get weather", "error", err)
+				return
+			}
+			queryText = text
+		} else {
+			queryText = bgQuery
 		}
 
-		bgImage, err := pixabay.GetImage(viper.GetString("PixabayAPIKey"), text)
+		bgImage, err := pixabay.GetImage(viper.GetString("PixabayAPIKey"), queryText)
 		if err != nil {
 			hclog.Default().Error("couldn't download background", "error", err)
 			return
@@ -54,7 +61,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 
-		err = convert.Merge(bgImage, weatherImg, "outFile.png")
+		err = convert.Merge(bgImage, weatherImg, outFile)
 		if err != nil {
 			hclog.Default().Error("couldn't merge images")
 		}
@@ -84,6 +91,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pixawttr.yaml)")
 	rootCmd.Flags().BoolVarP(&useFarenheight, "farenheight", "f", false, "if flag is set, don't use celcius")
+	rootCmd.Flags().StringVarP(&bgQuery, "query", "q", "", "Set this to use the given query instead of the current conditions as the search terms for the background")
 }
 
 // initConfig reads in config file and ENV variables if set.
