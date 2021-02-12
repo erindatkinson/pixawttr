@@ -22,7 +22,7 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "pixawttr location [--query query] [--farenheight] [outfile]",
+	Use:   "pixawttr [options] <location> [outfile]",
 	Short: "A binary to make pretty weather updates",
 	Long:  ``,
 
