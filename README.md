@@ -43,7 +43,10 @@ PixabayAPIKey: 12345678-f4f79534645cd471ea614adf92efffbc
 after which, you can run
 
 ```bash
-pixawttr "CityName" [outFile.png]
+pixawttr
+pixawttr -q "search term for bg image"
+pixawttr -u f
+pixawttr -o alternate_output.png
 ```
 
 and the resulting image will be either what you've entered for the outFile path, or `outFile.png` in the directory you run it.
