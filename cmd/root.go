@@ -3,79 +3,70 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/erindatkinson/pixawttr/internal/config"
 	"github.com/erindatkinson/pixawttr/internal/convert"
 	"github.com/erindatkinson/pixawttr/internal/pixabay"
 	"github.com/erindatkinson/pixawttr/internal/wttrin"
 	"github.com/hashicorp/go-hclog"
 	"github.com/spf13/cobra"
-
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 var (
-	cfgFile        string
-	useFarenheight bool
-	bgQuery        string
+	unit, output, query, location string
 )
+
+func rootRun(cmd *cobra.Command, args []string) {
+	weatherFn, err := wttrin.GetWeatherImage(location, unitInFarenheight())
+	if err != nil {
+		hclog.L().Error("error pulling weather image", "error", err)
+		return
+	}
+	defer os.Remove(weatherFn)
+
+	if query == "" {
+		query, err = wttrin.GetWeather(location, unitInFarenheight())
+		if err != nil {
+			hclog.L().Error("error pulling weather text", "error", err)
+			return
+		}
+	}
+	bgFn, err := pixabay.GetImage(viper.GetString("PixabayAPIKey"), query)
+	if err != nil {
+		hclog.L().Error("error pulling bg image", "error", err)
+		return
+	}
+	defer os.Remove(bgFn)
+
+	err = convert.Merge(bgFn, weatherFn, output)
+	if err != nil {
+		hclog.L().Error("error merging images", "error", err)
+		return
+	}
+
+}
+
+func unitInFarenheight() bool {
+	switch strings.ToLower(unit) {
+	case "f":
+		return true
+	case "c":
+		return false
+	default:
+		hclog.L().Error("unit must be one of 'c' or 'f'", "unit", unit)
+		os.Exit(1)
+	}
+	return false
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "pixawttr [options] <location> [outfile]",
+	Use:   "pixawttr [options]",
 	Short: "A binary to make pretty weather updates",
 	Long:  ``,
-
-	Run: func(cmd *cobra.Command, args []string) {
-		var outFile string
-		switch numArgs := len(cmd.Flags().Args()); {
-		case numArgs == 1:
-			outFile = "outFile.png"
-		case numArgs == 2:
-			outFile = cmd.Flags().Args()[1]
-		default:
-			cmd.Usage()
-			return
-		}
-		var queryText string
-		if bgQuery == "" {
-			text, err := wttrin.GetWeather(cmd.Flags().Args()[0], useFarenheight)
-			if err != nil {
-				hclog.Default().Error("couldn't get weather", "error", err)
-				return
-			}
-			queryText = text
-		} else {
-			queryText = bgQuery
-		}
-
-		bgImage, err := pixabay.GetImage(viper.GetString("PixabayAPIKey"), queryText)
-		if err != nil {
-			hclog.Default().Error("couldn't download background", "error", err)
-			return
-		}
-
-		weatherImg, err := wttrin.GetWeatherImage(cmd.Flags().Args()[0], useFarenheight)
-		if err != nil {
-			hclog.Default().Error("couldn't download forecast image", "error", err)
-			return
-		}
-
-		err = convert.Merge(bgImage, weatherImg, outFile)
-		if err != nil {
-			hclog.Default().Error("couldn't merge images")
-		}
-
-		hclog.Default().Info("Merged image is at", "location", outFile)
-
-		if err = os.Remove(bgImage); err != nil {
-			hclog.Default().Error("Didn't clean up interim image", "image", bgImage, "error", err)
-		}
-		if err = os.Remove(weatherImg); err != nil {
-			hclog.Default().Error("Didn't clean up interim image", "image", weatherImg, "error", err)
-		}
-
-	},
+	Run:   rootRun,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -88,35 +79,9 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pixawttr.yaml)")
-	rootCmd.Flags().BoolVarP(&useFarenheight, "farenheight", "f", false, "if flag is set, don't use celcius")
-	rootCmd.Flags().StringVarP(&bgQuery, "query", "q", "", "Set this to use the given query instead of the current conditions as the search terms for the background")
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".pixawttr" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".pixawttr")
-		viper.SetConfigType("yaml")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	cobra.OnInitialize(config.InitConfig)
+	rootCmd.Flags().StringVarP(&unit, "unit", "u", "c", "unit for temperature [c|f]")
+	rootCmd.Flags().StringVarP(&query, "query", "q", "", "query for picture")
+	rootCmd.Flags().StringVarP(&output, "output", "o", "outfile.png", "file to output to")
+	rootCmd.Flags().StringVarP(&location, "location", "l", "Golden", "The location for weather")
 }

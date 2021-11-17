@@ -1,0 +1,33 @@
+<h1 id="pixawttr">Pixawttr</h1>
+<figure>
+<img src="assets/main_img.png" alt="example image of a train in a snowy landscape with a composite addition of current conditions in Golden, CO, USA at a random time" /><figcaption aria-hidden="true">example image of a train in a snowy landscape with a composite addition of current conditions in Golden, CO, USA at a random time</figcaption>
+</figure>
+<p>Pixawttr is a golang program to automate the creation of a pretty composite forcast image.</p>
+<p>It uses the <a href="https://wttr.in">wttr.in</a> service to get “Current conditions” data and an analogous PNG.</p>
+<p>It uses the <a href="https://pixabay.com/api/docs/#api_search_images">Pixabay Search API</a> to enable the random downloading of an image based on a query string.</p>
+<h2 id="installation">Installation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="ex">go</span> get github.com/erindatkinson/pixawttr</span></code></pre></div>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Pixawttr has an external dependency of imagemagick.</p>
+<h4 id="macoslinuxlinuxbrew">MacOS/Linux(linuxbrew)</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="ex">brew</span> bundle</span></code></pre></div>
+<h4 id="windows">Windows</h4>
+<ol type="1">
+<li>Follow the <a href="https://imagemagick.org/script/download.php#windows">instructions</a></li>
+<li>Make sure that the tools are accessible and set in the PATH</li>
+<li>If <code>composite --help</code> doesn’t work in Powershell and the PATH is set correctly, you will also need to Set-Alias for <code>magick composite</code> to <code>composite</code>.</li>
+</ol>
+<h2 id="usage">Usage</h2>
+<p>To use pixawttr, you’ll need to sign up for a Pixabay account, once you’ve logged in, you can see your API key in the <code>key</code> parameter under the <a href="https://pixabay.com/api/docs/#api_search_images">Search Images</a> section of the API docs. (I haven’t been able to find a way besides this to get the key :woman-shrugging:)</p>
+<p>Once you have the key, you can place it in the environment variable <code>PixabayAPIKey</code> or at $HOME/.pixawttr in the following format</p>
+<pre class="text"><code>PixabayAPIKey: 12345678-f4f79534645cd471ea614adf92efffbc</code></pre>
+<p>after which, you can run</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="ex">pixawttr</span> <span class="st">&quot;CityName&quot;</span> [outFile.png]</span></code></pre></div>
+<p>and the resulting image will be either what you’ve entered for the outFile path, or <code>outFile.png</code> in the directory you run it.</p>
+<h2 id="contributing">Contributing</h2>
+<p>Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.</p>
+<p>Please make sure to update tests as appropriate.</p>
+<p>All contributors are held to the <a href="docs/CODE_OF_CONDUCT.md">Code of Conduct</a> adapted from the <a href="https://www.contributor-covenant.org/version/1/4/code-of-conduct.html">Contributor Covenant version 1.4</a></p>
+<h2 id="license">License</h2>
+<p>By using this you agree to abide by the <a href="https://pixabay.com/service/license/">Pixabay License</a> in the usage of images downloaded from Pixabay.</p>
+<p>The code for pixawttr is licensed under MPL V2.0 <a href="LICENSE">License</a></p>
